@@ -16,12 +16,10 @@ You will be presented with a list of talks from which you need to
 choose one (type its number and press ENTER). Try ./tedstreamer -h
 to see all the other options (not too many yet!).
 
-Tested with mpv, mplayer and vlc/cvlc. Subtitles won't work for the
-latter - the video will completely fail to play if you attempt to use
-subtitles with vlc.
-If you do not have the mpv player, you *must* supply the -p parameter
-(e.g. ./tedstreamer.py -p mplayer -s es zombie) - or just get mpv,
-it's great! ;-)
+Tested with mpv, mplayer and vlc/cvlc. If you do not have the mpv
+player, you *must* supply the -p parameter, e.g.:
+./tedstreamer.py -p mplayer -s es zombie
+- or just get mpv, it's great!
 
 Example language codes for subtitles:
 en = English
