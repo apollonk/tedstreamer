@@ -1,3 +1,5 @@
+tedstreamer: Stream TED talks from the command line, with subtitles!
+
 The program should be rather easy to use for anyone with basic
 Linux CLI skills. No installation needed, the script is self-contained
 and runs as-is, just change to the directory where the script is
