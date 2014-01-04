@@ -141,7 +141,6 @@ class TedStream:
                 # Got it, parse the JSON into a quality:URL dict
                 v = json.loads(m.group('json'))
                 for video in v:
-                    print 'Found: ' + video['id']
                     self.talk_vids[video['id'].lower()] = video['file']
         try:
             talk_intro = ((float(regex_intro.findall(self.webpage)[0])
@@ -156,10 +155,10 @@ class TedStream:
         """Start streaming a TED talk"""
 
         # Adjust subtitle option
-        if self.player == "mpv":
-            subopt = "--sub"
-        else:
-            subopt = "-sub"
+        subopts = { "mpv":"--sub",
+                    "mplayer":"-sub",
+                    "vlc":"--sub-file" }
+        subopt = subopts[ self.player ]
 
         if self.subs:
             with open("/tmp/__tedtalk_sub", 'w') as srt_file:
@@ -251,7 +250,7 @@ def options():
                                    description=desc)
 
     parser.add_option("-s", "--sub", dest="sublang",
-              help="use subtitle language SUBLANG, e.g. en,es,zh-ch... (default: no subtitles)",
+              help="use subtitle language SUBLANG, e.g. en,es,zh-cn... (default: no subtitles)",
               default=False)
     parser.add_option("-q", "--quality", dest="quality",
               help="set video quality to QUALITY, i.e. standard or high (default: high)",
