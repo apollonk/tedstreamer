@@ -1,0 +1,18 @@
+The program should be rather easy to use for anyone with basic
+Linux CLI skills. No installation needed, the script is self-contained
+and runs as-is, just change to the directory where the script is
+downloaded, give the file execution permissions and run it, e.g.
+
+./tedstreamer.py -s en brains
+
+(or if you don't want to / can't chmod:
+python tedstreamer.py -s en brains)
+
+You will be presented with a list of talks from which you need to
+choose one (type its number and press ENTER). Try ./tedstreamer -h
+to see all the other options (not too many yet!).
+
+Tested with mpv, mplayer and vlc/cvlc. Subtitles won't work for the
+latter.
+
+Now go get inspired or something!
