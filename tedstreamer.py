@@ -34,7 +34,7 @@
 __author__ = "Apollon Koutlidis - apollon@planewalk.net"
 __license__ = "GNU General Public License version 3"
 __date__ = "04/01/2014"
-__version__ = "0.1"
+__version__ = "0.2"
 
 try:
     import pycurl
@@ -243,11 +243,11 @@ def check_exec_posix(prog):
 def options():
     """Defines the command line arguments and options for the script."""
 
-    usage = """usage: %prog [Options] search_term
+    usage = """usage: %prog [Options] search_term [search term ...]
 
     e.g.:
 
-    %prog zombie"""
+    %prog zombie jesus"""
     desc = "Lists and streams TED Talks (with optional subtitles) from the command line."
     parser = optparse.OptionParser(usage=usage, version="%prog " + __version__,
                                    description=desc)
@@ -281,7 +281,7 @@ def main():
     #    opts.sublang='off'
 
     t = Ted()
-    t.search_talks(str(args[0]))
+    t.search_talks('+'.join(args))
     if opts.playfirst:
         t.stream_talk(opts)
     else:
