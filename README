@@ -5,6 +5,8 @@ Linux CLI skills. No installation needed, the script is self-contained
 and runs as-is, just change to the directory where the script is
 downloaded, give the file execution permissions and run it, e.g.
 
+git clone https://apollonk@bitbucket.org/apollonk/tedstreamer.git
+cd tedstreamer
 ./tedstreamer.py -s en brains
 
 (or if you don't want to / can't chmod:
