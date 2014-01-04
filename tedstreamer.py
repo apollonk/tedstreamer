@@ -155,9 +155,12 @@ class TedStream:
         """Start streaming a TED talk"""
 
         # Adjust subtitle option
-        subopts = { "mpv":"--sub",
+        subopts = {
+                    "mpv":"--sub",
                     "mplayer":"-sub",
-                    "vlc":"--sub-file" }
+                    "vlc":"--sub-file",
+                    "cvlc":"--sub-file"
+                  }
         subopt = subopts[ self.player ]
 
         if self.subs:
