@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 """
-    ted.py: Browse and stream TED talks on the command line
+    tedstreamer.py: Browse and stream TED talks on the command line
 """
 
 #==============================================================================
@@ -47,6 +47,7 @@ try:
     import urllib2
     import optparse
     import platform
+    from bs4 import BeautifulSoup
 except ImportError:
     # Checks the installation of the necessary python modules
     print((os.linesep * 2).join(["An error found importing one module:",
@@ -59,7 +60,8 @@ class Ted:
 
     def __init__(self):
         self.talks = []
-        self.webpage = ''
+        self.webpage = None
+        self.found = None
 
     def search_talks(self,term):
         """
@@ -67,13 +69,16 @@ class Ted:
            talks dictionary
         """
 
-        url = 'http://www.ted.com/search?cat=ss_talks&q=' + term
-        self.webpage = urllib2.urlopen(url).readlines()
-        p = re.compile('^.*h5 class="title"..a href="(?P<url>.*)">(?P<title>.*)./a.', re.IGNORECASE)
-        for line in self.webpage:
-            if p.match(line):
-                m = p.search(line)
-                self.talks.append(Talk(m.group('title'),m.group('url')))
+        url = 'https://www.ted.com/search?cat=talks&per_page=20&q=' + term
+        self.webpage = BeautifulSoup(''.join(urllib2.urlopen(url).readlines()))
+        talks = self.webpage.find_all('article')
+        if len(self.talks) > 0:
+            self.found = True
+        for talk in talks:
+            self.talks.append(Talk(title = talk.a.string,
+                                   url = talk.a.get('href'),
+                                   description = talk.find_all('div')[3].string
+                             ))
 
     def print_talks(self):
         """Print list of talks currently in the list"""
@@ -90,15 +95,15 @@ class Ted:
 class Talk:
     """Class representing a single TED Talk"""
 
-    def __init__(self,title,url):
+    def __init__(self,title,url, description=""):
         self.title = title
         self.url = url
-        self.contents = ''
+        self.description = description
 
     def stream(self, opts):
         """Interface to the stream object"""
         sys.stdout.write("Will now stream "+self.title+"\n")
-        stream = TedStream(self.url, opts)
+        stream = TedStream("https://www.ted.com/"+self.url, opts)
         stream.start_stream()
 
 class TedStream:
