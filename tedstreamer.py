@@ -33,14 +33,14 @@
 
 __author__ = "Apollon Koutlidis - apollon@planewalk.net"
 __license__ = "GNU General Public License version 3"
-__date__ = "04/01/2014"
-__version__ = "0.2"
+__date__ = "20/01/2015"
+__version__ = "0.3"
 
+import os
+import sys
 try:
     import pycurl
     import re
-    import sys
-    import os
     import subprocess
     import time
     import json
@@ -48,11 +48,14 @@ try:
     import optparse
     import platform
     from bs4 import BeautifulSoup
+    import readline
 except ImportError:
     # Checks the installation of the necessary python modules
     print((os.linesep * 2).join(["An error found importing one module:",
           str(sys.exc_info()[1]), "You need to install it", "Stopping..."]))
     sys.exit(-2)
+
+opts='';
 
 
 class Ted:
@@ -70,10 +73,15 @@ class Ted:
         """
 
         url = 'https://www.ted.com/search?cat=talks&per_page=20&q=' + term
+        print "URL: %s" % url
         self.webpage = BeautifulSoup(''.join(urllib2.urlopen(url).readlines()))
         talks = self.webpage.find_all('article')
-        if len(self.talks) > 0:
+        if len(talks) > 0:
             self.found = True
+            self.talks = []
+        else:
+            self.found = False
+
         for talk in talks:
             self.talks.append(Talk(title = talk.a.string,
                                    url = talk.a.get('href'),
@@ -273,25 +281,116 @@ def options():
     return parser
 
 def main():
-    """Main loop"""
+    """Main entry point"""
 
     # first, parse the options & arguments
     (opts, args) = options().parse_args()
 
-    if not args:
-        options().print_help()
-        sys.exit(1)
+    #if not args:
+    #    options().print_help()
+    #    sys.exit(1)
 
     #if not opts.sublang:
     #    opts.sublang='off'
 
-    t = Ted()
-    t.search_talks('+'.join(args))
     if opts.playfirst:
+        t = Ted()
+        t.search_talks('+'.join(args))
         t.stream_talk(opts)
     else:
+        hi()
+        loop()
+
+
+def loop():
+    """Main console UI loop"""
+
+    # Input handling regexes
+    regex_search = re.compile('^/(?P<term>.+)$')
+    regex_quit = re.compile('^(quit|exit|!q)')
+    regex_play = re.compile('^(?P<index>[0-9]+)$')
+
+    # Readline UI prompt
+    rl_prompt_start = "TEDstreamer %s: " % __version__
+    rl_prompt_results = "TEDstreamer %s - pick talk by number: " % __version__
+
+    t = Ted()
+    while True:
+        #if (t.found):
+        #    print len(t.talks) + " TED talks found:"
+        print "=" * 75
         t.print_talks()
-        t.stream_talk(opts, index=int(raw_input("Choose a video: ")))
+        #    prompt = rl_prompt_results
+        #else:
+        #    print
+        #    print "No talks have been found."
+        #    print
+        #    prompt = rl_prompt_start
+        try:
+            line = raw_input(rl_prompt_start)
+        except EOFError:
+            print "exit"
+            bye()
+        if not line or regex_quit.match(line):
+            #TODO: Say bye
+            bye()
+        elif regex_search.match(line):
+            m = regex_search.search(line)
+            v = m.group('term')
+            print "Searching for: \"" + v + "\""
+            # TODO: Actually do the search
+            t.search_talks('+'.join(v.split()))
+            # if any results...
+            #t.print_talks()
+        elif regex_play.match(line):
+            m = regex_play.search(line)
+            v = m.group('index')
+            print "will play " + v
+            t.stream_talk(opts, index=int(v))
+        else:
+            print "I don't recognise this directive."
+
+
+def hi():
+    """
+       Prints a greeting message and exits
+    """
+
+    print
+    print "Welcome to TEDstreamer %s!" % __version__
+    print
+    print "Use / to search, e.g.: /zombie jesus"
+    print
+    print "Use ? for help"
+    print
+    print "Enter 'exit' or 'quit' to exit TEDstreamer."
+    print
+
+def bye():
+    """
+       Prints an exit message and exits
+    """
+
+    print
+    print "Thanks for using TEDstreamer %s! Bye now..." % __version__
+    print
+    sys.exit(0)
+
+def enable_proxy(http_proxy):
+    """ Enables proxy for urllib2 calls - http-only version """
+
+    enable_proxy(http_proxy, "")
+
+def enable_proxy(http_proxy, https_proxy):
+    """ Enables proxy for urllib2 calls """
+
+    proxy_support = urllib2.ProxyHandler({"http":http_proxy})
+    opener = urllib2.build_opener(proxy_support)
+    urllib2.install_opener(opener)
+    if (len(https_proxy) > 0):
+        proxy_support = urllib2.ProxyHandler({"https":https_proxy})
+        opener = urllib2.build_opener(proxy_support)
+        urllib2.install_opener(opener)
 
 if __name__ == "__main__":
     #WIN_OS = True if platform.system() == 'Windows' else False
@@ -299,4 +398,13 @@ if __name__ == "__main__":
     #    FOUND = check_exec_posix('mpv')
     #    if not FOUND:
     #        FOUND = check_exec_posix('mplayer')
+    if os.environ['http_proxy']:
+        print "Proxy detected, enabling..."
+        if os.environ['https_proxy']:
+            enable_proxy(os.environ.get('http_proxy'),
+                         os.environ.get('https_proxy'))
+        else:
+            #TODO: Change to plain HTTP when HTTPS not available
+            print "HTTPS proxy not available, TEDstreamer may not work"
+            enable_proxy(os.environ.get('http_proxy'))
     main()
