@@ -169,7 +169,7 @@ class TedStream:
 
         # Adjust subtitle option
         subopts = {
-                    "mpv":"--sub",
+                    "mpv":"--sub-file",
                     "mplayer":"-sub",
                     "vlc":"--sub-file",
                     "cvlc":"--sub-file"
@@ -284,6 +284,7 @@ def main():
     """Main entry point"""
 
     # first, parse the options & arguments
+    global opts
     (opts, args) = options().parse_args()
 
     #if not args:
@@ -398,9 +399,9 @@ if __name__ == "__main__":
     #    FOUND = check_exec_posix('mpv')
     #    if not FOUND:
     #        FOUND = check_exec_posix('mplayer')
-    if os.environ['http_proxy']:
+    if 'http_proxy' in os.environ:
         print "Proxy detected, enabling..."
-        if os.environ['https_proxy']:
+        if 'https_proxy' in os.environ:
             enable_proxy(os.environ.get('http_proxy'),
                          os.environ.get('https_proxy'))
         else:
